@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+outputs/
+models/
+datasets/lanes-subset/
+.DS_Store
