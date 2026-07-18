@@ -9,6 +9,7 @@ Repositorio **público**: puedes descargar todo lo necesario para realizar las p
 | Caso | Carpeta | Tema |
 |------|---------|------|
 | **CP1** | [`CP1-carriles/`](CP1-carriles/) | Detección de carriles: clásico vs deep learning |
+| **CP2** | [`CP2-midas/`](CP2-midas/) | Profundidad monocular con foundation models (MiDaS, Depth Anything v2) |
 
 *(Se irán añadiendo CP2–CP5.)*
 
