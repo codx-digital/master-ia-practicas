@@ -8,7 +8,9 @@ numpy==2.5.1
 pillow==12.3.0
 
 # CV clásica
-opencv-python==5.0.0.93
+# OpenCV 4.x (wheel abi3 → vale hasta 3.14). NO subir a 5.x: cambia la forma de
+# salida de HoughLinesP de (N,1,4) a (N,4) y rompe el desempaquetado de los notebooks.
+opencv-python==4.13.0.92
 
 # Deep learning (CPU)
 torch==2.13.0
