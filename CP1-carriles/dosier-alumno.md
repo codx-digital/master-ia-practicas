@@ -84,14 +84,15 @@ El desarrollo se organiza en varios archivos denominados **notebooks** (se expli
 
 Se trata de una serie de pasos mecánicos, equivalentes a la instalación de cualquier programa. Se ejecutarán en el siguiente orden:
 
-1. **Creación de una cuenta de GitHub** (donde se alojan las imágenes).
+1. **Descarga del material** de la práctica desde GitHub.
 2. **Apertura de la terminal** (la ventana para introducir instrucciones).
 3. **Instalación de Python** (el lenguaje en el que están escritos los programas).
-4. **Instalación y conexión de `gh`** (la herramienta de descarga de las imágenes).
-5. **Acceso a la carpeta** de la práctica.
-6. **Creación de un entorno e instalación de las dependencias** necesarias.
-7. **Descarga de las imágenes y del modelo de inteligencia artificial**.
-8. **Apertura de Jupyter** y ejecución del primer notebook.
+4. **Creación de una cuenta de GitHub** (necesaria para la herramienta de descarga).
+5. **Instalación y conexión de `gh`** (la herramienta que descarga imágenes y modelo).
+6. **Acceso a la carpeta** de la práctica.
+7. **Creación de un entorno e instalación de las dependencias** necesarias.
+8. **Descarga de las imágenes y del modelo de inteligencia artificial**.
+9. **Apertura de Jupyter** y ejecución del primer notebook.
 
 > Se recomienda marcar ✅ cada paso a medida que se completa.
 
@@ -107,15 +108,15 @@ Se trata de una serie de pasos mecánicos, equivalentes a la instalación de cua
 
 ---
 
-## Paso 1 · Creación de la cuenta de GitHub
+## Paso 1 · Descarga del material desde GitHub
 
-Las imágenes y el modelo se alojan en GitHub, por lo que es necesario disponer de una cuenta (es **gratuita**).
+Todo el material de la práctica está en un repositorio **público** de GitHub. Cualquiera puede descargarlo; no se requiere permiso.
 
-1. Acceda a **https://github.com/signup**
-2. Introduzca un **correo electrónico**, una **contraseña** y un **nombre de usuario**. Conserve estos datos.
-3. Confirme la dirección de correo (recibirá un mensaje con un código).
+1. Acceda a **https://github.com/codx-digital/master-ia-practicas**
+2. Pulse el botón verde **`Code`** y, en el menú desplegable, **`Download ZIP`**.
+3. Abra el archivo descargado para **descomprimirlo** y sitúe la carpeta resultante en un lugar accesible (por ejemplo, el **Escritorio**).
 
-> 💡 El material de esta práctica es de **acceso público**: no se requiere ningún permiso ni invitación especial.
+Dentro encontrará la carpeta **`CP1-carriles`**, con los notebooks, el dosier y todo lo necesario para el resto de los pasos.
 
 ---
 
@@ -138,7 +139,7 @@ Aparecerá una ventana con texto y un cursor intermitente. En ella se introducir
 ## Paso 3 · Instalación de Python (parte 1)
 
 1. Acceda a **https://www.python.org/downloads/**
-2. Pulse el botón principal para descargar **Python 3.12** (o cualquier versión 3.10 o superior).
+2. Pulse el botón principal para descargar la **versión más reciente** de Python (la 3.13; también valen la 3.11 o la 3.12).
 3. Abra el archivo descargado para iniciar la instalación.
 
 > ⚠️ **En Windows es imprescindible**: en la primera pantalla del instalador, active la casilla **`Add Python to PATH`** (situada en la parte inferior) **antes** de pulsar *Install Now*. De lo contrario, los comandos no funcionarán.
@@ -165,7 +166,19 @@ python3 --version
 
 ---
 
-## Paso 4 · Instalación de `gh` (parte 1)
+## Paso 4 · Creación de la cuenta de GitHub
+
+Para la herramienta que descargará las imágenes y el modelo (Paso 5) se necesita una cuenta de GitHub (es **gratuita**).
+
+1. Acceda a **https://github.com/signup**
+2. Introduzca un **correo electrónico**, una **contraseña** y un **nombre de usuario**. Conserve estos datos.
+3. Confirme la dirección de correo (recibirá un mensaje con un código).
+
+> 💡 El material es de **acceso público**: con la cuenta creada es suficiente, no se requiere ningún permiso ni invitación especial.
+
+---
+
+## Paso 5 · Instalación de `gh` (parte 1)
 
 `gh` es la herramienta encargada de descargar las imágenes desde GitHub.
 
@@ -187,9 +200,9 @@ brew install gh
 
 ---
 
-## Paso 4 · Conexión de `gh` con la cuenta (parte 2)
+## Paso 5 · Conexión de `gh` con la cuenta (parte 2)
 
-A continuación se conecta `gh` con la cuenta de GitHub creada en el Paso 1. Escriba:
+A continuación se conecta `gh` con la cuenta de GitHub creada en el Paso 4. Escriba:
 
 ```
 gh auth login
@@ -208,9 +221,9 @@ Aparecerá un **código** de 8 caracteres (p. ej. `A1B2-C3D4`). **Cópielo**, pu
 
 ---
 
-## Paso 5 · Acceso a la carpeta de la práctica
+## Paso 6 · Acceso a la carpeta de la práctica
 
-La carpeta `CP1-carriles` ya se encuentra en su equipo (proporcionada por el coordinador o descargada previamente). Es necesario indicar a la terminal que acceda a ella.
+La carpeta `CP1-carriles` es la que **descargó y descomprimió en el Paso 1**. Es necesario indicar a la terminal que acceda a ella.
 
 Escriba `cd` (que significa *cambiar de carpeta*), un **espacio**, y a continuación **arrastre la carpeta `CP1-carriles`** desde el explorador de archivos **hasta la ventana de la terminal**: la ruta se completará automáticamente. Pulse Intro.
 
@@ -224,7 +237,7 @@ Para confirmar el acceso, escriba `ls` (Mac) o `dir` (Windows): deberán aparece
 
 ---
 
-## Paso 6 · Creación del entorno e instalación de dependencias
+## Paso 7 · Creación del entorno e instalación de dependencias
 
 > 💡 **¿Qué es un "entorno virtual"?** Un **conjunto de herramientas independiente**, específico para esta práctica, que evita interferencias con el resto del equipo. Se crea mediante un único comando.
 
@@ -245,7 +258,7 @@ source .venv/bin/activate   ← Mac
 
 ---
 
-## Paso 6 · Instalación de dependencias (continuación)
+## Paso 7 · Instalación de dependencias (continuación)
 
 Con el entorno activado (`(.venv)` visible), instale todos los componentes que requieren los programas:
 
@@ -264,7 +277,7 @@ Este proceso tarda **algunos minutos** y muestra abundante texto en pantalla. Es
 
 ---
 
-## Paso 7 · Descarga de las imágenes y del modelo
+## Paso 8 · Descarga de las imágenes y del modelo
 
 Un único comando descarga las 14 imágenes de carretera y el modelo de inteligencia artificial (alojados en GitHub, de ahí la necesidad de `gh`):
 
@@ -272,11 +285,11 @@ Un único comando descarga las 14 imágenes de carretera y el modelo de intelige
 python scripts/download_assets.py
 ```
 
-> ✅ Al finalizar debe indicarse que se han descargado las imágenes y el archivo `.onnx` (el modelo). Si la descarga falla, compruebe su conexión a internet y que `gh` figura como conectado (Paso 4).
+> ✅ Al finalizar debe indicarse que se han descargado las imágenes y el archivo `.onnx` (el modelo). Si la descarga falla, compruebe su conexión a internet y que `gh` figura como conectado (Paso 5).
 
 ---
 
-## Paso 8 · Apertura de Jupyter
+## Paso 9 · Apertura de Jupyter
 
 > 💡 **¿Qué es Jupyter?** Un programa que abre los **notebooks** en el navegador. Un **notebook** es un documento que combina explicaciones y fragmentos de programa que pueden ejecutarse por partes, denominadas **celdas**.
 
@@ -291,7 +304,7 @@ Se abrirá **automáticamente** una pestaña en el navegador con un listado de a
 
 ---
 
-## Paso 9 · Ejecución de un notebook
+## Paso 10 · Ejecución de un notebook
 
 Un notebook se compone de **celdas** (recuadros) dispuestas en secuencia. Para ejecutar una celda:
 
@@ -305,7 +318,7 @@ Repita la operación con **todas las celdas, de arriba abajo y en orden**.
 
 ---
 
-## Paso 10 · Verificación final
+## Paso 11 · Verificación final
 
 Ejecute **todas** las celdas de `01_setup.ipynb`. La última debe mostrar:
 
@@ -324,9 +337,9 @@ Si, por el contrario, se muestra un ❌ o un error en rojo, identifique la celda
 | Síntoma | Causa habitual | Solución |
 |---------|----------------|----------|
 | `command not found` / *"no se reconoce"* | Python o `gh` mal instalados | Repita el paso; en Windows, active *Add to PATH* |
-| No aparece `(.venv)` | El entorno no se activó | Repita el comando de *activación* del Paso 6 |
+| No aparece `(.venv)` | El entorno no se activó | Repita el comando de *activación* del Paso 7 |
 | `error` en rojo durante `pip install` | Falló una dependencia | Copie el mensaje al foro |
-| La descarga falla | Sin conexión o `gh` sin conectar | Compruebe internet y repita `gh auth login` (Paso 4) |
+| La descarga falla | Sin conexión o `gh` sin conectar | Compruebe internet y repita `gh auth login` (Paso 5) |
 | Una celda tarda **más de 10 min** | Existe un problema | **Deténgase** y consulte |
 
 > No se espera que el alumno resuelva estas incidencias por su cuenta. Durante la sesión en directo y en el foro se ofrece asistencia.
