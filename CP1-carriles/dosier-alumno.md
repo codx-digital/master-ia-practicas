@@ -474,7 +474,7 @@ El documento deberá contener las siguientes secciones:
 4. **Comparación** — las 3 gráficas + un párrafo de conclusión.
 5. **Respuestas** a las 5 preguntas del archivo `05_preguntas.md`.
 
-> 💡 Para generar el PDF, redacte el contenido en un procesador de textos (Word o Google Docs), inserte las imágenes y utilice la opción **"Exportar / Guardar como PDF"**.
+> 💡 Use la **plantilla `plantilla-respuestas-cp1.docx`** (carpeta `entregable/`): trae las secciones y las preguntas ya montadas. Rellénela, inserte las imágenes y expórtela a PDF (**Archivo → Exportar → PDF**).
 
 ---
 
