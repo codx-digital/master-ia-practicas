@@ -139,7 +139,7 @@ Aparecerá una ventana con texto y un cursor intermitente. En ella se introducir
 ## Paso 3 · Instalación de Python (parte 1)
 
 1. Acceda a **https://www.python.org/downloads/**
-2. Pulse el botón principal para descargar la **versión más reciente** de Python (la 3.13; también valen la 3.11 o la 3.12).
+2. Pulse el botón principal para descargar la **versión más reciente** de Python (la 3.14; también valen la 3.11, 3.12 o 3.13).
 3. Abra el archivo descargado para iniciar la instalación.
 
 > ⚠️ **En Windows es imprescindible**: en la primera pantalla del instalador, active la casilla **`Add Python to PATH`** (situada en la parte inferior) **antes** de pulsar *Install Now*. De lo contrario, los comandos no funcionarán.
