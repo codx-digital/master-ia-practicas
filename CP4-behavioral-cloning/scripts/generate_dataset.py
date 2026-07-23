@@ -43,38 +43,25 @@ except ImportError as e:
     )
 
 
-def expert_policy(obs_kin):
-    """Policy heurístico ('expert') sobre observación KINEMATICS.
+STEER_MAX = np.pi / 4   # coincide con steering_range del env
 
-    obs_kin shape: (vehicles, features=5) → [presence, x, y, vx, vy] del ego + 4 vecinos.
 
-    Lógica:
-        - Mantener carril si despejado (steering ≈ 0).
-        - Si hay vehículo delante muy cerca, cambiar al carril libre.
-        - Devuelve steering ∈ [-1, 1] (continuo).
+def expert_steer(vehicle, network, target_lane_index, k_lat=4.0, k_head=0.7):
+    """Policy 'expert' de mantenimiento de carril usando el ESTADO REAL del coche.
+
+    En vez de depender de una observación normalizada (frágil entre versiones de
+    highway-env), controlamos directamente con la geometría: llevamos el coche al
+    centro del carril objetivo corrigiendo (a) su desviación lateral y (b) su rumbo.
+    Es un controlador tipo Stanley simplificado.
+
+    Devuelve steering ∈ [-1, 1] (se mapea al steering_range del env).
     """
-    ego = obs_kin[0]                  # primera fila = ego
-    others = obs_kin[1:]              # demás vehículos relativos al ego
-    ego_y = ego[2]                    # ya está normalizado por highway-env
-
-    # Detectar coche delante cercano (mismo carril ≈ misma y, x > 0)
-    front_threat = False
-    for v in others:
-        present, dx, dy, _, _ = v
-        if present < 0.5:
-            continue
-        if 0 < dx < 0.20 and abs(dy) < 0.05:
-            front_threat = True
-            break
-
-    if not front_threat:
-        # Volver al centro del carril más probable
-        steering = -0.3 * ego_y       # restauración suave
-    else:
-        # Cambiar al carril contrario al ego_y (heurística simple)
-        steering = -0.6 if ego_y >= 0 else 0.6
-
-    return float(np.clip(steering, -1.0, 1.0))
+    lane = network.get_lane(target_lane_index)
+    longitudinal, lateral = lane.local_coordinates(vehicle.position)
+    lane_heading = lane.heading_at(longitudinal)
+    heading_err = (vehicle.heading - lane_heading + np.pi) % (2 * np.pi) - np.pi
+    angle = -k_head * heading_err - np.arctan2(k_lat * lateral, max(vehicle.speed, 3.0))
+    return float(np.clip(angle / STEER_MAX, -1.0, 1.0))
 
 
 def make_env(config_overrides: dict | None = None, seed: int = 0):
@@ -107,74 +94,63 @@ def make_env(config_overrides: dict | None = None, seed: int = 0):
     return env
 
 
-def make_kinematics_env(config_overrides: dict | None = None, seed: int = 0):
-    """Mismo entorno pero con observación KINEMATICS para que el expert vea otros vehículos.
-
-    Truco: corremos DOS entornos en paralelo con misma semilla — uno KINEMATICS
-    (para el expert) y otro GRAYSCALE (para guardar la observación que verá la CNN).
-    Esto es la convención clásica de BC con teacher heurístico + observación visual.
-    """
-    base_config = {
-        'observation': {
-            'type': 'Kinematics',
-            'vehicles_count': 5,
-            'features': ['presence', 'x', 'y', 'vx', 'vy'],
-            'normalize': True,
-        },
-        'action': {'type': 'ContinuousAction', 'longitudinal': False, 'lateral': True,
-                   'steering_range': [-np.pi / 4, np.pi / 4]},
-        'lanes_count': 4,
-        'vehicles_count': 20,
-        'duration': 60,
-        'policy_frequency': 5,
-        'simulation_frequency': 15,
-    }
-    if config_overrides:
-        base_config.update(config_overrides)
-
-    env = gym.make('highway-v0', config=base_config)
-    env.reset(seed=seed)
-    return env
+LANE_CHANGE_PERIOD = 8   # cada ~8 pasos el expert decide un cambio de carril → da variedad de steering
 
 
 def collect_split(n_samples: int, base_seed: int, ood: bool, verbose: bool = True):
-    """Recolecta n_samples pares (obs_visual, steering) con el expert policy."""
+    """Recolecta n_samples pares (obs_visual, steering) con el expert de mantenimiento de carril.
+
+    Usamos UN solo entorno (grayscale = lo que ve la CNN) y leemos el estado real del
+    coche (`env.unwrapped.vehicle`) para que el expert lo mantenga en la carretera.
+    El expert va cambiando de carril objetivo cada pocos pasos para generar giros.
+    """
     visual_obs, steerings = [], []
 
     # Si OOD, cambiar densidad + carriles
     overrides = {}
     if ood:
-        overrides = {'lanes_count': 3, 'vehicles_count': 35, 'duration': 60}
+        # OOD = geometría NO vista en train (5 carriles vs 4) + otra densidad de tráfico.
+        # Con 5 carriles la variedad de giro es ~la de train, así que el gap in-dist vs OOD
+        # refleja la GENERALIZACIÓN a geometría nueva (no solo un cambio de distribución de acciones).
+        overrides = {'lanes_count': 5, 'vehicles_count': 30, 'duration': 60}
 
+    rng = np.random.default_rng(base_seed)   # decisiones de cambio de carril → deterministas
     seed = base_seed
     pbar_step = max(1, n_samples // 20)
 
     while len(steerings) < n_samples:
-        # Crear pareja KINEMATICS (expert decide) + VISUAL (lo que ve la CNN)
-        env_kin = make_kinematics_env(overrides, seed=seed)
-        env_vis = make_env(overrides, seed=seed)
-        obs_k, _ = env_kin.reset(seed=seed)
-        obs_v, _ = env_vis.reset(seed=seed)
+        env = make_env(overrides, seed=seed)
+        obs, _ = env.reset(seed=seed)
+        network = env.unwrapped.road.network
+        veh = env.unwrapped.vehicle
+        _from, _to, lane_id = veh.lane_index
+        n_lanes = len(network.graph[_from][_to])
+        target_lane = lane_id
+        step_i = 0
 
         done = trunc = False
         while not (done or trunc):
-            steer = expert_policy(obs_k)
+            veh = env.unwrapped.vehicle
+            _from, _to, _ = veh.lane_index
+            step_i += 1
+
+            # cambio de carril deliberado cada LANE_CHANGE_PERIOD pasos (dentro de la calzada)
+            if step_i % LANE_CHANGE_PERIOD == 0:
+                nxt = target_lane + (1 if rng.random() < 0.5 else -1)
+                if 0 <= nxt < n_lanes:
+                    target_lane = nxt
+
+            steer = expert_steer(veh, network, (_from, _to, target_lane))
 
             # GRAYSCALE devuelve shape (stack_size, H, W) — lo pasamos a (H, W, 3)
-            if obs_v.ndim == 3 and obs_v.shape[0] == 3:
-                obs_save = np.transpose(obs_v, (1, 2, 0))
+            if obs.ndim == 3 and obs.shape[0] == 3:
+                obs_save = np.transpose(obs, (1, 2, 0))
             else:
-                obs_save = obs_v
-            obs_save = obs_save.astype(np.uint8)
-            visual_obs.append(obs_save)
+                obs_save = obs
+            visual_obs.append(obs_save.astype(np.uint8))
             steerings.append(steer)
 
-            # acción continuo: highway-env espera vector [steering]
-            action_continuous = np.array([steer], dtype=np.float32)
-            obs_k, _, done_k, trunc_k, _ = env_kin.step(action_continuous)
-            obs_v, _, done_v, trunc_v, _ = env_vis.step(action_continuous)
-            done = done_k or done_v
-            trunc = trunc_k or trunc_v
+            obs, _, done, trunc, _ = env.step(np.array([steer], dtype=np.float32))
 
             if len(steerings) >= n_samples:
                 break
@@ -183,8 +159,7 @@ def collect_split(n_samples: int, base_seed: int, ood: bool, verbose: bool = Tru
                 sys.stdout.write(f"\r  {'OOD' if ood else 'in-dist':>8s}  {len(steerings):>5d}/{n_samples}")
                 sys.stdout.flush()
 
-        env_kin.close()
-        env_vis.close()
+        env.close()
         seed += 1
 
     if verbose:
